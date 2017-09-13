@@ -34,10 +34,22 @@ public class GuitarApp extends SimplePicoPro {
     int timbre_value = 0;
     int volume = 0;
     final int timbre_controller = 0x47;
+    float a0;
+    float fsr_upper = 3.5f;
+    float fsr_twidth = .4f;
+    float fsr_threshhold = 1.5f;
+    int pitch_min = 8192;
+    int pitch_max = 16000;
 
+    boolean unpitched = true;
+    boolean pressedC = false;
+    boolean pressedE = false;
+    boolean pressedG = false;
     @Override
     public void setup() {
         //Sets the PinModes and the EdgeTriggers
+        analogInit(); //need to call this first before calling analogRead()
+
         pinMode(buttonUp,Gpio.DIRECTION_IN);
         pinMode(buttonDown,Gpio.DIRECTION_IN);
         pinMode(buttonLeft,Gpio.DIRECTION_IN);
@@ -45,20 +57,14 @@ public class GuitarApp extends SimplePicoPro {
         pinMode(buttonEnter,Gpio.DIRECTION_IN);
         pinMode(buttonDelete,Gpio.DIRECTION_IN);
 
-        setEdgeTrigger(buttonUp,Gpio.EDGE_BOTH);
-        setEdgeTrigger(buttonDown,Gpio.EDGE_BOTH);
-        setEdgeTrigger(buttonLeft,Gpio.EDGE_BOTH);
-        setEdgeTrigger(buttonRight,Gpio.EDGE_BOTH);
-        setEdgeTrigger(buttonEnter,Gpio.EDGE_BOTH);
-        setEdgeTrigger(buttonDelete,Gpio.EDGE_BOTH);
-
         uartInit(UART6,115200);
         serialMidi = new SerialMidi(UART6);
     }
 
     @Override
     public void loop() {
-//
+        pitch_adjust(analogRead(A0));
+        tone_adjust();
 //        serialMidi.midi_controller_change(channel,timbre_controller,timbre_value);
 //
 //        serialMidi.midi_note_on(channel,SerialMidi.MIDI_C4,velocity);
@@ -82,61 +88,61 @@ public class GuitarApp extends SimplePicoPro {
 
     }
 
+    private void pitch_adjust(float reading){
+        a0 = (float)3.3 - reading;
+        //print("Reading: "+a0);
+        if(a0 > fsr_threshhold){
+            println("FSR: "+a0);
+            float diff = (float)(a0 - fsr_threshhold) / (float)(fsr_upper - fsr_threshhold);
+            float result = pitch_min + ((pitch_max - pitch_min) * diff);
+            println("New Pitch:" + result);
+            serialMidi.midi_pitch_bend(channel, (int)result);
+            unpitched = false;
+        }else {
+            if (a0 < (fsr_threshhold - fsr_twidth) && !unpitched) {
+                println("Normal Pitch!");
+                serialMidi.midi_pitch_bend(channel, pitch_min);
+                unpitched = true;
+            }
+        }
+    }
 
-        //translate - translates the button presses into adjustments of the model.
-        //Direction buttons will change the row or column, Enter or Delete
-        //will add or remove characters from the resulting message.
-        //Note - the columns and rows will wrap around.
-        private void translate(Gpio button) {
-//            serialMidi.midi_controller_change(channel,timbre_controller,timbre_value);
-
-            //if "left" is pressed, decrease column
-            if (button == buttonLeft) {
-                serialMidi.midi_note_on(channel,SerialMidi.MIDI_C4,velocity);
-                this.printStringToScreen("LEFT");
-                //if "right" is pressed, increase the column
-            } else if (button == buttonRight) {
-                velocity = velocity + 5;
-                if(velocity > 127)
-                    velocity = 127;
-                //if "down" is pressed, increase the row
-            } else if (button == buttonDown) {
-                serialMidi.midi_pitch_bend(channel,8192);
-                //if "up" is pressed, decrease the row
-            } else if (button == buttonUp) {
-                serialMidi.midi_pitch_bend(channel,12000);
-                //if "Enter" is pressed, add selected character to the message
-            } else if (button == buttonEnter) {
-                velocity = velocity - 5;
-                if (velocity < 0)
-                    velocity = 0;
-
-            } else if (button == buttonDelete) {
+    private void tone_adjust(){
+        if (!digitalRead(buttonLeft)){
+            if(!pressedC){
+                serialMidi.midi_note_on(channel, SerialMidi.MIDI_C4, velocity);
+                this.printStringToScreen("C");
+                pressedC = true;
+            }
+        } else {
+            if(pressedC){
                 serialMidi.midi_note_off(channel,SerialMidi.MIDI_C4,127);
-
-            }
-//            timbre_value+=5;
-//            if(timbre_value>=127)
-//                timbre_value=0;
-//            serialMidi.midi_controller_change(channel,timbre_controller,timbre_value);
-
-
-        }
-
-        @Override
-        void digitalEdgeEvent(Gpio pin, boolean value) {
-            long nowTime = System.currentTimeMillis();
-            //simple debouncing via time comparison
-            if((nowTime - lastTime) > debounceTime) {
-
-                if (value == LOW) {     //button was pressed
-                    translate(pin);       //adjust the model
-                    //update the view
-                    lastTime = nowTime;
-
-                } else {              //value == HIGH, button released
-                    lastTime = nowTime;
-                }
+                pressedC = false;
             }
         }
+        if (!digitalRead(buttonRight)){
+            if(!pressedE){
+                serialMidi.midi_note_on(channel, SerialMidi.MIDI_E4, velocity);
+                this.printStringToScreen("E");
+                pressedE = true;
+            }
+        } else {
+            if(pressedE){
+                serialMidi.midi_note_off(channel,SerialMidi.MIDI_E4,127);
+                pressedE = false;
+            }
+        }
+        if (!digitalRead(buttonUp)){
+            if(!pressedG){
+                serialMidi.midi_note_on(channel, SerialMidi.MIDI_G4, velocity);
+                this.printStringToScreen("G");
+                pressedG = true;
+            }
+        } else {
+            if(pressedG){
+                serialMidi.midi_note_off(channel,SerialMidi.MIDI_G4,127);
+                pressedG = false;
+            }
+        }
+    }
 }
