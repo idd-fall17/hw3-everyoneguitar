@@ -5,11 +5,15 @@ import com.google.android.things.pio.Gpio;
 import edu.berkeley.idd.utils.SerialMidi;
 
 /**
- * Demo of the SerialMidi class
- * Created by bjoern on 9/12/17.
+ * Original by bjoern on 9/12/17.
+ * Modified by strushucb.
+ *
+ * Use Hairless MIDI Serial to MIDI Bridge
+ * Windows: Run LoopMIDI
+ * MIDI Synth: ZynAddSubFX
  */
 
-public class MidiTestApp extends SimplePicoPro {
+public class GuitarApp extends SimplePicoPro {
 
     /* Mapping of buttons to GPIO pins! */
     private Gpio buttonUp = GPIO_172;
@@ -28,6 +32,7 @@ public class MidiTestApp extends SimplePicoPro {
     int channel = 0;
     int velocity = 127; //0..127
     int timbre_value = 0;
+    int volume = 0;
     final int timbre_controller = 0x47;
 
     @Override
@@ -83,38 +88,37 @@ public class MidiTestApp extends SimplePicoPro {
         //will add or remove characters from the resulting message.
         //Note - the columns and rows will wrap around.
         private void translate(Gpio button) {
-            serialMidi.midi_controller_change(channel,timbre_controller,timbre_value);
+//            serialMidi.midi_controller_change(channel,timbre_controller,timbre_value);
 
             //if "left" is pressed, decrease column
             if (button == buttonLeft) {
                 serialMidi.midi_note_on(channel,SerialMidi.MIDI_C4,velocity);
                 this.printStringToScreen("LEFT");
-                println("LEFT");
-
                 //if "right" is pressed, increase the column
             } else if (button == buttonRight) {
-                serialMidi.midi_note_on(channel,SerialMidi.MIDI_E4,127);
+                velocity = velocity + 5;
+                if(velocity > 127)
+                    velocity = 127;
                 //if "down" is pressed, increase the row
             } else if (button == buttonDown) {
-                serialMidi.midi_note_off(channel,SerialMidi.MIDI_C4,127);
-
+                serialMidi.midi_pitch_bend(channel,8192);
                 //if "up" is pressed, decrease the row
             } else if (button == buttonUp) {
-                serialMidi.midi_note_on(channel,SerialMidi.MIDI_G4,127);
-
+                serialMidi.midi_pitch_bend(channel,12000);
                 //if "Enter" is pressed, add selected character to the message
             } else if (button == buttonEnter) {
-                serialMidi.midi_note_off(channel,SerialMidi.MIDI_E4,127);
+                velocity = velocity - 5;
+                if (velocity < 0)
+                    velocity = 0;
 
             } else if (button == buttonDelete) {
-                serialMidi.midi_note_off(channel,SerialMidi.MIDI_G4,127);
+                serialMidi.midi_note_off(channel,SerialMidi.MIDI_C4,127);
 
             }
-
-            timbre_value+=5;
-            if(timbre_value>=127)
-                timbre_value=0;
-            serialMidi.midi_controller_change(channel,timbre_controller,timbre_value);
+//            timbre_value+=5;
+//            if(timbre_value>=127)
+//                timbre_value=0;
+//            serialMidi.midi_controller_change(channel,timbre_controller,timbre_value);
 
 
         }
