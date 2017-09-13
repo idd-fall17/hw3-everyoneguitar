@@ -21,8 +21,10 @@ import com.google.android.things.contrib.driver.mma8451q.Mma8451Q;
  *   SDA to SDA on IDD Hat
  * Analog sensors:
  *   Middle of voltage divider to Analog A0..A3 on IDD Hat
+ *
  */
 
+//Steve test edit
 public class Hw3TemplateApp extends SimplePicoPro {
 
     Mma8451Q accelerometer;
