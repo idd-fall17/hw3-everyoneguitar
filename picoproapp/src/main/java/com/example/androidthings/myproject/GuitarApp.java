@@ -22,10 +22,10 @@ import edu.berkeley.idd.utils.SerialMidi;
 public class GuitarApp extends SimplePicoPro {
 
     /* Mapping of buttons to GPIO pins! */
-    private Gpio buttonUp = GPIO_172;
-    private Gpio buttonDown = GPIO_174;
-    private Gpio buttonLeft = GPIO_173;
-    private Gpio buttonRight = GPIO_10;
+    private Gpio buttonUp = GPIO_172; // G
+    private Gpio buttonDown = GPIO_34;
+    private Gpio buttonLeft = GPIO_173; // C
+    private Gpio buttonRight = GPIO_174; //F
 
     //keep track of time for debouncing
     private long lastStrumTime = 0;
@@ -95,7 +95,9 @@ public class GuitarApp extends SimplePicoPro {
 
     @Override
     public void loop() {
-
+//        if(!digitalRead(buttonLeft)) print("Button C Pressed");
+//        if(!digitalRead(buttonUp)) print("Button G Pressed");
+//        if(!digitalRead(buttonRight)) print("Button F Pressed");
         if(testing) {
             if (!pressedC) {
                 pressedC = true;
@@ -112,18 +114,21 @@ public class GuitarApp extends SimplePicoPro {
             float a0 = analogRead(A0);
             pitch_adjust(a0);
             //print("Chord is held!");
-            strum(false);
+            strum();
         }else {
             turn_off_notes();
         }
     }
 
-    private void strum(boolean testing) {
+
+    //strum - reads the accelerometer and sends a MIDI message if the chord should be played
+    private void strum() {
         float[] xyz = {0.f, 0.f, 0.f};
         try {
-            if(!testing)
+            if(!testing) {
+                //read the accelerometer
                 xyz = accelerometer.readSample();
-            else {
+            }else {
                 if(millis() % 3 == 0) {
                     xyz[0] = 0.7f;
                     xyz[1] = 0.7f;
@@ -136,7 +141,10 @@ public class GuitarApp extends SimplePicoPro {
             float y_dir = xyz[1];
             float x_dir = xyz[0];
             //println("Y: " + y_dir);
+
+            //Test to see if the X or Y acceleration exceeds the threshold and it isn't the same strumming motion
             if ((Math.abs(y_dir) > play_threshhold || Math.abs(x_dir) > play_threshhold) && isStrummed == false) {
+                //if so play the notes
                 println("Played! Y: " + y_dir);
                 println("Played! X: " + x_dir);
                 //float diff = (float) (y_dir - play_threshhold) / (float) (play_upper - play_threshhold);
@@ -146,11 +154,14 @@ public class GuitarApp extends SimplePicoPro {
                 lastStrumTime= millis();
                 play_notes();
             } else {
+                //if the acceleration does not exceed the threshhold and debounce for variations in readings
                 if ((y_dir < (play_threshhold - play_twidth) && x_dir < (play_threshhold - play_twidth)) && millis() > (lastStrumTime + strumDebounceTime)) {
                     //print("Strum stopped!");
                     isStrummed = false;
                 }
             }
+            //if the noise has been resonating with no strumming, we'll turn off the notes
+            //after 2 seconds (this is because some MIDI instruments make perpetual sound)
             if(isResonating == true && millis() > lastStrumTime + 2000){
                 turn_off_notes();
                 isResonating = false;
@@ -160,9 +171,12 @@ public class GuitarApp extends SimplePicoPro {
         }
     }
 
+    //pitch_adjust: adjusts the pitch of the sound
     private void pitch_adjust(float reading) {
+        //make the lower resistance (harder squeeze) the higher number
         a0 = (float) 3.3 - reading;
         //print("Reading: "+a0);
+        //check if our threshhold is exceeded
         if (a0 > fsr_threshhold) {
             println("FSR: " + a0);
             float diff = (float) (a0 - fsr_threshhold) / (float) (fsr_upper - fsr_threshhold);
@@ -171,6 +185,9 @@ public class GuitarApp extends SimplePicoPro {
             serialMidi.midi_pitch_bend(channel, (int) result);
             unpitched = false;
         } else {
+            //if below our threshold, return to normal pitch.
+            //unpitched is a flag that we are back to normal, so that
+            //we don't keep sending MIDI messages.
             if (a0 < (fsr_threshhold - fsr_twidth) && !unpitched) {
                 println("Normal Pitch!");
                 serialMidi.midi_pitch_bend(channel, pitch_min);
@@ -179,27 +196,34 @@ public class GuitarApp extends SimplePicoPro {
         }
     }
 
+    //play_notes: generates and sends the midi messages for the selected chords
     private void play_notes() {
+        //we need to stop current chords because you cannot play multiple chords at once
+        //on a guitar
         turn_off_notes();
         if(isChord()) isOn = true;
+        //C Major
         if (pressedC) {
             serialMidi.midi_note_on(channel, SerialMidi.MIDI_C4, velocity);
             serialMidi.midi_note_on(channel, SerialMidi.MIDI_E4, velocity);
             serialMidi.midi_note_on(channel, SerialMidi.MIDI_G4, velocity);
             this.printStringToScreen("C ");
         }
+        //F Major
         if (pressedF) {
             serialMidi.midi_note_on(channel, SerialMidi.MIDI_F4, velocity);
             serialMidi.midi_note_on(channel, SerialMidi.MIDI_A4, velocity);
             serialMidi.midi_note_on(channel, SerialMidi.MIDI_C4, velocity);
             this.printStringToScreen("F ");
         }
+        //G Major
         if (pressedG) {
             serialMidi.midi_note_on(channel, SerialMidi.MIDI_G4, velocity);
             serialMidi.midi_note_on(channel, SerialMidi.MIDI_B4, velocity);
             serialMidi.midi_note_on(channel, SerialMidi.MIDI_D4, velocity);
             this.printStringToScreen("G ");
         }
+        //A Minor
         if (pressedAm) {
             serialMidi.midi_note_on(channel, SerialMidi.MIDI_A4, velocity);
             serialMidi.midi_note_on(channel, SerialMidi.MIDI_C4, velocity);
@@ -208,7 +232,9 @@ public class GuitarApp extends SimplePicoPro {
         }
     }
 
+    //turn_off_notes = sends a message to turn off all notes.
     private void turn_off_notes(){
+        //isOn is a flag that prevents sending unneeded MIDI messages
         if(isOn) {
             serialMidi.midi_note_off(channel, SerialMidi.MIDI_C4, 127);
             serialMidi.midi_note_off(channel, SerialMidi.MIDI_E4, 127);
@@ -221,12 +247,15 @@ public class GuitarApp extends SimplePicoPro {
         }
     }
 
+    //isChord: simply returns true if any chord button is pressed
     private boolean isChord(){
         return pressedAm || pressedC || pressedF || pressedG;
     }
 
+    //tone_adjust: selects which chord should be played
     private void tone_adjust(){
         long currentTime = millis();
+        //debounces for
         if(currentTime >= lastChordTime + chordDebounceTime) {
             lastChordTime = currentTime;
             if (!digitalRead(buttonLeft)) {
