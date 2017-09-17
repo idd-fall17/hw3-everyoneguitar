@@ -256,31 +256,31 @@ public class GuitarApp extends SimplePicoPro {
     //tone_adjust: selects which chord should be played
     private void tone_adjust(){
         long currentTime = millis();
-        //debounces for
+        //debounces for chord select buttons
         if(currentTime >= lastChordTime + chordDebounceTime) {
             lastChordTime = currentTime;
-            if (!digitalRead(buttonLeft)) {
+            if (!digitalRead(buttonLeft)) { //C Button
                 if (CTime <= 0) {
                     CTime = currentTime;
                 }
             } else {
                 CTime = 0;
             }
-            if (!digitalRead(buttonRight)) {
+            if (!digitalRead(buttonRight)) { //F Button
                 if (FTime <= 0) {
                     FTime = currentTime;
                 }
             } else {
                 FTime = 0;
             }
-            if (!digitalRead(buttonUp)) {
+            if (!digitalRead(buttonUp)) { //G Button
                 if (GTime <= 0) {
                     GTime = currentTime;
                 }
             } else {
                 GTime = 0;
             }
-            if (!digitalRead(buttonDown)) {
+            if (!digitalRead(buttonDown)) { // Am Button
                 if (ATime <= 0) {
                     ATime = currentTime;
                 }
@@ -288,6 +288,8 @@ public class GuitarApp extends SimplePicoPro {
                 ATime = 0;
             }
             pressedC = pressedG = pressedF = pressedAm = false;
+
+            //Only choose to press the button that has been pressed the latest
             if (CTime != 0 && CTime >= FTime && CTime >= GTime && CTime >= ATime) {
                 pressedC = true;
             } else if (GTime != 0 && GTime > CTime && GTime > FTime && GTime > ATime) {
@@ -300,6 +302,7 @@ public class GuitarApp extends SimplePicoPro {
         }
     }
 
+    //added a teardown method for the analog sensors
     @Override
     public void teardown() {
         super.teardown();
