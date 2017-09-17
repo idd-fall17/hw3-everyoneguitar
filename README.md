@@ -2,7 +2,7 @@ EveryoneGuitar by Steve Trush, Linlin Cai, and Yu Song
 =====================================
 Have you ever wanted to start playing the guitar but did you <i>fret</i> about all those strings? How can we help beginners, especially children and others lacking finger dexterity, overcome those fears to start composing songs and build the coordination and motivation for future guitar lessons?  
 Introducing the EveryoneGuitar, a fun interactive device that strikes all the right chords - here is a demo: <br>
-https://www.youtube.com/watch?v=S0Ccens-_vA
+https://www.youtube.com/watch?v=DYG7iARvjqY
 
 This is an interactive MIDI input device designed for Interactive Device Design (Fall 2017) at UC Berkeley. Using the Pico Pro kit, the device was built to demonstrate how we can apply analog sensors such as accelerometers and force sensitive resistors and communicate over serial connections with other devices such as a PC.
 
@@ -13,7 +13,7 @@ We all collaborated on the initial idea and design of the device, deciding how u
 <b>Yu Song</b>: In charge of the sensor integration, she built the electrical circuits including the sensors, mounted the circuits, and managed the wires/connections to the Pico Pro.<br>
 
 The control scheme we came up with:<br>
-One hand is used to press four buttons that each represent one of four triad chords: root major, major 4th, major 5th, minor 6th. The default key is C Major, though the key can be shifted in the software synthesizer. Holding ComfortablePick(tm) with their opposite hand, the user will make a strumming motion causing the software synth to play a chord. The ComfortablePick can also be squeezed to modulate the pitch of the output sound.
+One hand is used to press four buttons that each represent one of three triad chords: root major, major 4th, major 5th. The default key is C Major, though the key can be shifted in the software synthesizer. Holding the ComfortablePick(tm), a squeezable plush toy with their opposite hand, the user will make a strumming motion causing the software synth to play a chord. The ComfortablePick can also be squeezed to modulate the pitch of the output sound.
 
 Hardware implementation:<br>
 For chord selection, four momentary pushbutton switches are mounted in a the end of a plywood guitar-shaped structure. The wires continue down the neck of the guitar and connect to 4 GPIO pins on the development board. For the ComfortablePick, an accelerometer is encased in a wood mount with a Force Sensitive Resistor mounted adjacent for one to manipulate with their thumb. The accelerometer and FSR are then connected to the I2C and analog A0 pin respectively. A serial to USB cable connects UART6 to a PC. 
@@ -34,10 +34,13 @@ The MIDI messages control a software sythesizer according to this "stack":
  
 
 <b>Reflection:</b><br> 
-How successful you thought your controller or instrument was in the end - what worked well and what didn't? What was easy and what was hard?
+This homework exercised our abilities to integrate the team's skills and products together into a working instrument. Were our efforts successfull? This is difficult to assess, much of our time to collaborate was spent making the final product actually reliably function once assembled - it really wasn't until we had close to a finished prototype that we could assess how useful our design decisions actually were. In some regards, we were successful in creating a device that could presumably ease a beginner towards the real instrument. For instance, small touches like making sure the chord is held before strumming can help hone the motor skills required for the real thing, but still our instrument can also feel somewhat limiting in the range of sounds that can be produced and in its responsiveness to the user's touch. The accelerometer is not perhaps the best tool to mimic strumming - we discussed in the team that a strum combines nuances of pressure, speed, direction, and timing to produce sounds. Even with 3 directions, boiling down strumming to acceleration over a given threshhold can feel unrealistic.<br>
+
+The easiest parts of this assignment were those parts that could task organized and tackled individually: connecting circuits and wiring, writing code to read the sensors, or cutting out the physical compartments. The most challenging was being able to efficiently collaborate together and assemble the pieces into a working whole. While past assignments also forced us to use tools we had never used and branch into fields outside of our expertise, this assignment made us task organize the project between various unfamiliar teammates. The greatest lesson would be not to underestimate the time to integrate pieces and to figure out how to debug problems arising from adding in new pieces.<br>
+
 
 <b>Demo video:</b> 
-
+https://www.youtube.com/watch?v=DYG7iARvjqY
 
 License
 -------

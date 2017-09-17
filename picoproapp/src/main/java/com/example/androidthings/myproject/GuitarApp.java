@@ -140,10 +140,11 @@ public class GuitarApp extends SimplePicoPro {
             //println(UART6,xyz[0]+"\t"+xyz[1]+"\t"+xyz[2]); // this goes to the Serial port
             float y_dir = xyz[1];
             float x_dir = xyz[0];
+            float z_dir = xyz[2];
             //println("Y: " + y_dir);
 
             //Test to see if the X or Y acceleration exceeds the threshold and it isn't the same strumming motion
-            if ((Math.abs(y_dir) > play_threshhold || Math.abs(x_dir) > play_threshhold) && isStrummed == false) {
+            if ((Math.abs(y_dir) > play_threshhold || Math.abs(x_dir) > play_threshhold || Math.abs(z_dir) > play_threshhold) && isStrummed == false) {
                 //if so play the notes
                 println("Played! Y: " + y_dir);
                 println("Played! X: " + x_dir);
@@ -155,7 +156,7 @@ public class GuitarApp extends SimplePicoPro {
                 play_notes();
             } else {
                 //if the acceleration does not exceed the threshhold and debounce for variations in readings
-                if ((y_dir < (play_threshhold - play_twidth) && x_dir < (play_threshhold - play_twidth)) && millis() > (lastStrumTime + strumDebounceTime)) {
+                if ((y_dir < (play_threshhold - play_twidth) && x_dir < (play_threshhold - play_twidth) && z_dir < (play_threshhold - play_twidth)) && millis() > (lastStrumTime + strumDebounceTime)) {
                     //print("Strum stopped!");
                     isStrummed = false;
                 }
