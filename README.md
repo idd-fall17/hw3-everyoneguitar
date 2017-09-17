@@ -1,5 +1,6 @@
 EveryoneGuitar by Steve Trush, Linlin Cai, and Yu Song
 =====================================
+<img src="./finished_guitar.jpg"/>
 Have you ever wanted to start playing the guitar but did you <i>fret</i> about all those strings? How can we help beginners, especially children and others lacking finger dexterity, overcome those fears to start composing songs and build the coordination and motivation for future guitar lessons?  
 Introducing the EveryoneGuitar, a fun interactive device that strikes all the right chords - here is a demo: <br>
 https://www.youtube.com/watch?v=DYG7iARvjqY
@@ -17,13 +18,14 @@ One hand is used to press four buttons that each represent one of three triad ch
 
 Hardware implementation:<br>
 For chord selection, four momentary pushbutton switches are mounted in a the end of a plywood guitar-shaped structure. The wires continue down the neck of the guitar and connect to 4 GPIO pins on the development board. For the ComfortablePick, an accelerometer is encased in a wood mount with a Force Sensitive Resistor mounted adjacent for one to manipulate with their thumb. The accelerometer and FSR are then connected to the I2C and analog A0 pin respectively. A serial to USB cable connects UART6 to a PC. 
+<img src="./assembly.jpg"/><br>
 
 Software implementation:<br>
 The GuitarApp.java extends the SimplePicoPro class and depends upon the SerialMidi class. After initializing readers on 4 GPIO pins, the serial connection on UART6, and analog inputs, the program enters sits in a simple loop that:
 1. Detect which chord buttons are currently being pressed. Select only the most recently pressed chord to sound.
-2. If a chord is being pressed, detect if the user is making a strumming motion or squeezing the pick.
-    2a. If the user is moving the accelerometer along the X or Y beyond an arbitrary acceleration threshhold, create MIDI message to turn on the notes pertaining to that chord, silencing any notes that may still be playing from the previous strum. 
-    2b. If the user is squeezing the FSR beyond an arbitrary threshold, create a MIDI message increasing the pitch in inverse proportion to the read resistance. 
+2. If a chord is being pressed, detect if the user is making a strumming motion or squeezing the pick.<br>
+    2a. If the user is moving the accelerometer along the X or Y beyond an arbitrary acceleration threshhold, create MIDI message to turn on the notes pertaining to that chord, silencing any notes that may still be playing from the previous strum.<br> 
+    2b. If the user is squeezing the FSR beyond an arbitrary threshold, create a MIDI message increasing the pitch in inverse proportion to the read resistance. <br>
     2c. If the user is not strumming, but the user is still holding a chord, the synthesizer will continue to resonate those notes for 1 seconds.
 3. If a chord is not being pressed, silence any sounding notes.
 
@@ -32,6 +34,7 @@ The MIDI messages control a software sythesizer according to this "stack":
 2. Hairless MIDI/Serial Bridge then receives the messages on the connected PC and will forward the messages to a virtual MIDI output port instantiated using loopMIDI.
 3. The MIDI output is then read by the software sythesizer: We used the open source ZynAddSubFX.
  
+<img src="./finishing_touches.jpg"/><br>
 
 <b>Reflection:</b><br> 
 This homework exercised our abilities to integrate the team's skills and products together into a working instrument. Were our efforts successfull? This is difficult to assess, much of our time to collaborate was spent making the final product actually reliably function once assembled - it really wasn't until we had close to a finished prototype that we could assess how useful our design decisions actually were. In some regards, we were successful in creating a device that could presumably ease a beginner towards the real instrument. For instance, small touches like making sure the chord is held before strumming can help hone the motor skills required for the real thing, but still our instrument can also feel somewhat limiting in the range of sounds that can be produced and in its responsiveness to the user's touch. The accelerometer is not perhaps the best tool to mimic strumming - we discussed in the team that a strum combines nuances of pressure, speed, direction, and timing to produce sounds. Even with 3 directions, boiling down strumming to acceleration over a given threshhold can feel unrealistic.<br>
