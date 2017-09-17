@@ -13,14 +13,14 @@ We all collaborated on the initial idea and design of the device, deciding how u
 <b>Linlin</b>: In charge of the hardware construction, she produced the physical configuration, laser cut, and assembled the main body of the guitar.</br>
 <b>Yu Song</b>: In charge of the sensor integration, she built the electrical circuits including the sensors, mounted the circuits, and managed the wires/connections to the Pico Pro.<br>
 
-The control scheme we came up with:<br>
+<b>The control scheme we came up with:</b><br>
 One hand is used to press four buttons that each represent one of three triad chords: root major, major 4th, major 5th. The default key is C Major, though the key can be shifted in the software synthesizer. Holding the ComfortablePick(tm), a squeezable plush toy with their opposite hand, the user will make a strumming motion causing the software synth to play a chord. The ComfortablePick can also be squeezed to modulate the pitch of the output sound.
 
-Hardware implementation:<br>
+<b>Hardware implementation:</b>br>
 For chord selection, four momentary pushbutton switches are mounted in a the end of a plywood guitar-shaped structure. The wires continue down the neck of the guitar and connect to 4 GPIO pins on the development board. For the ComfortablePick, an accelerometer is encased in a wood mount with a Force Sensitive Resistor mounted adjacent for one to manipulate with their thumb. The accelerometer and FSR are then connected to the I2C and analog A0 pin respectively. A serial to USB cable connects UART6 to a PC. 
 <img src="./assembly.jpg"/><br>
 
-Software implementation:<br>
+<b>Software implementation:</b><br>
 The GuitarApp.java extends the SimplePicoPro class and depends upon the SerialMidi class. After initializing readers on 4 GPIO pins, the serial connection on UART6, and analog inputs, the program enters sits in a simple loop that:
 1. Detect which chord buttons are currently being pressed. Select only the most recently pressed chord to sound.
 2. If a chord is being pressed, detect if the user is making a strumming motion or squeezing the pick.<br>
