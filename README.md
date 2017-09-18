@@ -15,7 +15,11 @@ We all collaborated on the initial idea and design of the device, deciding how u
 <b>Yu Song</b>: In charge of the sensor integration, she built the electrical circuits including the sensors, mounted the circuits, and managed the wires/connections to the Pico Pro. Designed and fabricated the strumming device.<br>
 
 <b>The control scheme we came up with:</b><br>
-One hand is used to press three buttons that each represent one of three triad chords: root major, major 4th, major 5th. The default key is C Major, though the key can be shifted in the software synthesizer. Holding the ComfortablePick(tm), a squeezable plush toy with their opposite hand, the user will make a strumming motion causing the software synth to play a chord. The ComfortablePick can also be squeezed to modulate the pitch of the output sound.
+One hand is used to press three buttons that each represent one of three triad chords: root major, major 4th, major 5th. The default key is C Major, though the key can be shifted in the software synthesizer. Holding the ComfortablePick(tm), a squeezable plush toy with their opposite hand, the user will make a strumming motion causing the software synth to play a chord. The ComfortablePick can also be squeezed to modulate the pitch of the output sound.<br>
+By the assignment requirements:<br>
+<b>Note-on/Note-off</b>: A combination of holding chords (digital switches) and strumming (accelerometer).
+<b>Pitch changes</b>: Pitch is changed/chords are selected by holding down buttons. 
+<b>Additional 'timbre':</b> By squeezing the strumming device, tonal modulation mimics the bending of notes on a guitar.
 
 <b>Hardware implementation:</b>br>
 For chord selection, three momentary pushbutton switches are mounted in a the end of a plywood guitar-shaped structure. The wires continue down the neck of the guitar and connect to 3 GPIO pins on the development board. For the ComfortablePick, an accelerometer is encased in a wood mount with a Force Sensitive Resistor mounted adjacent for one to manipulate with their thumb. The accelerometer and FSR are then connected to the I2C and analog A0 pin respectively. A serial to USB cable connects UART6 to a PC. The wires of strumming device go through the gitar to connect two device together.<br>
